@@ -1,1 +1,10 @@
 node_modules
+.gemini/commands/roadmap.toml
+.gitignore
+roadmap.md
+
+# Build output
+/dist
+
+# Environment variables
+.env
