@@ -1,5 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import * as dotenv from 'dotenv';
+import { portfolioText, skillsText } from './core/text';
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ bot.onText(/\/start/, (msg) => {
         [{ text: 'Курс валют' }]
       ],
       resize_keyboard: true,
-      one_time_keyboard: true,
+      one_time_keyboard: false,
     },
   };
   bot.sendMessage(chatId, 'Добро пожаловать! Выберите одну из опций в меню:', opts);
@@ -38,11 +39,11 @@ bot.on('message', (msg) => {
   }
 
   if (text === 'Портфолио') {
-    bot.sendMessage(chatId, 'Раздел \"Портфолио\" находится в разработке');
+    bot.sendMessage(chatId, portfolioText, { parse_mode: 'Markdown' });
   } else if (text === 'Навыки') {
-    bot.sendMessage(chatId, 'Раздел \"Навыки\" находится в разработке');
+    bot.sendMessage(chatId, skillsText, { parse_mode: 'Markdown' });
   } else if (text === 'Курс валют') {
-    bot.sendMessage(chatId, 'Раздел \"Курс валют\" находится в разработке');
+    bot.sendMessage(chatId, 'Раздел "Курс валют" находится в разработке');
   } else {
     bot.sendMessage(chatId, `Вы написали: "${text}"`);
     console.log(`Получено сообщение от ${msg.from?.first_name || 'пользователя'}: ${text}`);
