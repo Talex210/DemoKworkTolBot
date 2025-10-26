@@ -2,6 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import * as dotenv from 'dotenv';
 import { portfolioText, skillsText } from './core/text';
 import { getUsdRubRate, pingApi, getUsdRubChartData } from './core/currencyService';
+import { generateChart } from './core/chartGenerator';
 
 dotenv.config();
 
@@ -18,12 +19,17 @@ console.log('Бот успешно запущен...');
 
 const handleChartRequest = async (chatId: number) => {
     try {
-        await bot.sendMessage(chatId, 'Запрашиваю данные для графика...');
+        await bot.sendMessage(chatId, 'Запрашиваю данные и генерирую график...');
         const chartData = await getUsdRubChartData();
-        console.log(chartData);
-        bot.sendMessage(chatId, 'Данные для графика в консоли.');
+        if (chartData.length === 0) {
+            bot.sendMessage(chatId, 'Недостаточно данных для построения графика.');
+            return;
+        }
+        const chartImage = await generateChart(chartData);
+        bot.sendPhoto(chatId, chartImage, { caption: 'График курса USD/RUB за последние 30 дней' });
     } catch (error) {
-        bot.sendMessage(chatId, 'Не удалось получить данные для графика. Попробуйте позже.');
+        console.error(error);
+        bot.sendMessage(chatId, 'Не удалось сгенерировать график. Попробуйте позже.');
     }
 };
 

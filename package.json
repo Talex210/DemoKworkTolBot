@@ -12,9 +12,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/jsdom": "^27.0.0",
     "@types/node-telegram-bot-api": "^0.64.11",
     "axios": "^1.12.2",
+    "d3": "^7.9.0",
     "dotenv": "^17.2.3",
+    "jsdom": "^27.0.1",
     "node-telegram-bot-api": "^0.66.0",
     "sharp": "^0.34.4"
   },
