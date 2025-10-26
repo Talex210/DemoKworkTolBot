@@ -22,7 +22,7 @@ bot.onText(/\/start/, (msg) => {
     reply_markup: {
       keyboard: [
         [{ text: 'Портфолио' }, { text: 'Навыки' }],
-        [{ text: 'Курс USD to RUB' }, { text: '/ping' }]
+        [{ text: 'Курс USD => RUB' }, { text: '/ping' }]
       ],
       resize_keyboard: true,
       one_time_keyboard: false,
@@ -67,7 +67,7 @@ bot.on('message', async (msg) => {
     bot.sendMessage(chatId, portfolioText, { parse_mode: 'Markdown' });
   } else if (text === 'Навыки') {
     bot.sendMessage(chatId, skillsText, { parse_mode: 'Markdown' });
-  } else if (text === 'Курс USD to RUB') {
+  } else if (text === 'Курс USD => RUB') {
     try {
       await bot.sendMessage(chatId, 'Запрашиваю курс...');
       const rate = await getUsdRubRate();
