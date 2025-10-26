@@ -8,6 +8,22 @@ interface MarketChartRangeResponse {
     total_volumes: [number, number][];
 }
 
+export async function pingApi(): Promise<boolean> {
+    try {
+        const apiKey = process.env.COINGECKO_DEMO_API_KEY;
+        const url = `${COINGECKO_API_BASE_URL}/ping`;
+        const params: { x_cg_demo_api_key?: string } = {};
+        if (apiKey) {
+            params.x_cg_demo_api_key = apiKey;
+        }
+        const response = await axios.get(url, { params });
+        return response.status === 200;
+    } catch (error) {
+        console.error('Error pinging CoinGecko API:', error);
+        return false;
+    }
+}
+
 export async function getHistoricalCryptoPrices(
     coinId: string,
     vsCurrency: string,
@@ -42,4 +58,35 @@ export function getTimestampNDaysAgo(days: number): number {
 // Helper to get current timestamp
 export function getCurrentTimestamp(): number {
     return Math.floor(Date.now() / 1000); // Convert to seconds
+}
+
+export async function getUsdRubRate(): Promise<number> {
+    try {
+        const apiKey = process.env.COINGECKO_DEMO_API_KEY;
+        const params: { ids: string; vs_currencies: string; x_cg_demo_api_key?: string } = {
+            ids: 'bitcoin',
+            vs_currencies: 'usd,rub',
+        };
+
+        if (apiKey) {
+            params.x_cg_demo_api_key = apiKey;
+        }
+
+        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+            params,
+        });
+
+        const data = response.data;
+        const usdPrice = data.bitcoin.usd;
+        const rubPrice = data.bitcoin.rub;
+
+        if (usdPrice && rubPrice) {
+            return rubPrice / usdPrice;
+        } else {
+            throw new Error('Could not retrieve valid price data.');
+        }
+    } catch (error) {
+        console.error('Error fetching USD/RUB rate:', error);
+        throw new Error('Could not fetch USD/RUB rate.');
+    }
 }

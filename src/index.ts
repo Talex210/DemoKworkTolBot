@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import * as dotenv from 'dotenv';
 import { portfolioText, skillsText } from './core/text';
+import { getUsdRubRate, pingApi } from './core/currencyService';
 
 dotenv.config();
 
@@ -21,7 +22,7 @@ bot.onText(/\/start/, (msg) => {
     reply_markup: {
       keyboard: [
         [{ text: 'Портфолио' }, { text: 'Навыки' }],
-        [{ text: 'Курс валют' }]
+        [{ text: 'Курс USD to RUB' }, { text: '/ping' }]
       ],
       resize_keyboard: true,
       one_time_keyboard: false,
@@ -30,11 +31,35 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, 'Добро пожаловать! Выберите одну из опций в меню:', opts);
 });
 
-bot.on('message', (msg) => {
+bot.onText(/\/ping/, async (msg) => {
+  const chatId = msg.chat.id;
+  try {
+    await bot.sendMessage(chatId, 'Проверяю доступность API...');
+    const isApiUp = await pingApi();
+    const message = isApiUp ? '✅ API CoinGecko доступно.' : '❌ API CoinGecko недоступно.';
+    bot.sendMessage(chatId, message);
+  } catch (error) {
+    bot.sendMessage(chatId, '❌ Произошла ошибка при проверке API.');
+  }
+});
+
+bot.onText(/\/rate/, async (msg) => {
+  const chatId = msg.chat.id;
+  try {
+    await bot.sendMessage(chatId, 'Запрашиваю курс...');
+    const rate = await getUsdRubRate();
+    bot.sendMessage(chatId, `Текущий курс: 1 USD ≈ ${rate.toFixed(2)} RUB`);
+  } catch (error) {
+    bot.sendMessage(chatId, 'Не удалось получить курс валют. Попробуйте позже.');
+  }
+});
+
+bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
-  if (!text || text === '/start') {
+  // Ignore commands that are handled by onText
+  if (!text || text.startsWith('/')) {
     return;
   }
 
@@ -43,7 +68,13 @@ bot.on('message', (msg) => {
   } else if (text === 'Навыки') {
     bot.sendMessage(chatId, skillsText, { parse_mode: 'Markdown' });
   } else if (text === 'Курс валют') {
-    bot.sendMessage(chatId, 'Раздел "Курс валют" находится в разработке');
+    try {
+      await bot.sendMessage(chatId, 'Запрашиваю курс...');
+      const rate = await getUsdRubRate();
+      bot.sendMessage(chatId, `Текущий курс: 1 USD ≈ ${rate.toFixed(2)} RUB`);
+    } catch (error) {
+      bot.sendMessage(chatId, 'Не удалось получить курс валют. Попробуйте позже.');
+    }
   } else {
     bot.sendMessage(chatId, `Вы написали: "${text}"`);
     console.log(`Получено сообщение от ${msg.from?.first_name || 'пользователя'}: ${text}`);
