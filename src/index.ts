@@ -67,7 +67,7 @@ bot.on('message', async (msg) => {
     bot.sendMessage(chatId, portfolioText, { parse_mode: 'Markdown' });
   } else if (text === 'Навыки') {
     bot.sendMessage(chatId, skillsText, { parse_mode: 'Markdown' });
-  } else if (text === 'Курс валют') {
+  } else if (text === 'Курс USD to RUB') {
     try {
       await bot.sendMessage(chatId, 'Запрашиваю курс...');
       const rate = await getUsdRubRate();
