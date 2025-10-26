@@ -104,3 +104,32 @@ export async function getUsdRubRate(): Promise<number> {
         throw new Error('Could not fetch USD/RUB rate.');
     }
 }
+
+export async function getUsdRubChartData(): Promise<{ timestamp: number; rate: number }[]> {
+    try {
+        const toTimestamp = getCurrentTimestamp();
+        const fromTimestamp = getTimestampNDaysAgo(30);
+
+        // Fetch historical data for both USD and RUB
+        const [usdPrices, rubPrices] = await Promise.all([
+            getHistoricalCryptoPrices('bitcoin', 'usd', fromTimestamp, toTimestamp),
+            getHistoricalCryptoPrices('bitcoin', 'rub', fromTimestamp, toTimestamp),
+        ]);
+
+        // Combine the data
+        const chartData = usdPrices.map(([timestamp, usdPrice]) => {
+            const rubPriceEntry = rubPrices.find(([rubTimestamp]) => rubTimestamp === timestamp);
+            if (rubPriceEntry) {
+                const rubPrice = rubPriceEntry[1];
+                const rate = rubPrice / usdPrice;
+                return { timestamp, rate };
+            }
+            return null;
+        }).filter((entry): entry is { timestamp: number; rate: number } => entry !== null);
+
+        return chartData;
+    } catch (error) {
+        console.error('Error fetching USD/RUB chart data:', error);
+        throw new Error('Could not fetch USD/RUB chart data.');
+    }
+}

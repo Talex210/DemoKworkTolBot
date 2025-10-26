@@ -1,7 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import * as dotenv from 'dotenv';
 import { portfolioText, skillsText } from './core/text';
-import { getUsdRubRate, pingApi } from './core/currencyService';
+import { getUsdRubRate, pingApi, getUsdRubChartData } from './core/currencyService';
 
 dotenv.config();
 
@@ -16,13 +16,25 @@ const bot = new TelegramBot(token, { polling: true });
 
 console.log('Бот успешно запущен...');
 
+const handleChartRequest = async (chatId: number) => {
+    try {
+        await bot.sendMessage(chatId, 'Запрашиваю данные для графика...');
+        const chartData = await getUsdRubChartData();
+        console.log(chartData);
+        bot.sendMessage(chatId, 'Данные для графика в консоли.');
+    } catch (error) {
+        bot.sendMessage(chatId, 'Не удалось получить данные для графика. Попробуйте позже.');
+    }
+};
+
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const opts: TelegramBot.SendMessageOptions = {
     reply_markup: {
       keyboard: [
         [{ text: 'Портфолио' }, { text: 'Навыки' }],
-        [{ text: 'Курс USD => RUB' }, { text: '/ping' }]
+        [{ text: 'Курс USD => RUB' }, { text: 'График USD => RUB' }],
+        [{ text: '/ping' }]
       ],
       resize_keyboard: true,
       one_time_keyboard: false,
@@ -54,6 +66,10 @@ bot.onText(/\/rate/, async (msg) => {
   }
 });
 
+bot.onText(/\/chart/, (msg) => {
+    handleChartRequest(msg.chat.id);
+});
+
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
@@ -75,6 +91,8 @@ bot.on('message', async (msg) => {
     } catch (error) {
       bot.sendMessage(chatId, 'Не удалось получить курс валют. Попробуйте позже.');
     }
+  } else if (text === 'График USD => RUB') {
+    handleChartRequest(chatId);
   } else {
     bot.sendMessage(chatId, `Вы написали: "${text}"`);
     console.log(`Получено сообщение от ${msg.from?.first_name || 'пользователя'}: ${text}`);
