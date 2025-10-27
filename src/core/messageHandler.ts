@@ -4,6 +4,18 @@ import { getUsdRubRate, pingApi } from "./currencyService";
 import { handleChartRequest } from "../commands/chart";
 import { withErrorHandler } from "../utils/errorHandler";
 
+export const mainKeyboard = [
+    [{ text: 'Портфолио' }, { text: 'Навыки' }],
+    [{ text: 'Курс USD => RUB' }, { text: 'График USD => RUB' }],
+    [{ text: 'Проверка API' }]
+];
+
+const startKeyboard = [
+    [{ text: 'Start' }]
+];
+
+const welcomeMessage = 'Добро пожаловать! Выберите одну из опций в меню или используйте команды: /portfolio, /skills, /rate, /chart, /ping';
+
 export const messageHandler = (bot: TelegramBot) => {
     bot.on('message', withErrorHandler(bot, async (msg) => {
         const chatId = msg.chat.id;
@@ -14,6 +26,15 @@ export const messageHandler = (bot: TelegramBot) => {
         }
 
         switch (text) {
+            case 'Start':
+                await bot.sendMessage(chatId, welcomeMessage, {
+                    reply_markup: {
+                        keyboard: mainKeyboard,
+                        resize_keyboard: true,
+                        one_time_keyboard: false,
+                    },
+                });
+                break;
             case 'Портфолио':
                 bot.sendMessage(chatId, portfolioText, { parse_mode: 'Markdown' });
                 break;
@@ -35,7 +56,13 @@ export const messageHandler = (bot: TelegramBot) => {
                 bot.sendMessage(chatId, message);
                 break;
             default:
-                bot.sendMessage(chatId, `Вы написали: "${text}"`);
+                await bot.sendMessage(chatId, `Вы написали: "${text}"`, {
+                    reply_markup: {
+                        keyboard: startKeyboard,
+                        resize_keyboard: true,
+                        one_time_keyboard: false,
+                    },
+                });
                 console.log(`Получено сообщение от ${msg.from?.first_name || 'пользователя'}: ${text}`);
                 break;
         }
