@@ -11,7 +11,7 @@ const handleChartRequest = async (bot: TelegramBot, chatId: number) => {
         return;
     }
     const chartImage = await generateChart(chartData);
-    bot.sendPhoto(chatId, chartImage, { caption: 'График курса USD/RUB за последние 30 дней' });
+    bot.sendPhoto(chatId, chartImage, { caption: 'График курса USD/RUB за последние 30 дней' }, { filename: 'chart.png', contentType: 'image/png' });
 };
 
 export const chartCommand = (bot: TelegramBot) => {
