@@ -1,10 +1,10 @@
 {
   "name": "kwork_demo_bot_tg",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "dev": "nodemon src/index.ts"
   },
   "keywords": [],
